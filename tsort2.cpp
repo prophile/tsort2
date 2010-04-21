@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 
 class tsort
 {
@@ -138,11 +139,30 @@ void printVersion()
 	printf("Copyright (c) Alistair Lynn, 2010\n");
 }
 
+void readInput(tsort& sorter, std::istream& inputStream, char delimiter)
+{
+	// add all pairs
+	std::string src, dst;
+	while (std::getline(inputStream, src, delimiter))
+	{
+		if (!std::getline(inputStream, dst, '\n'))
+		{
+			fprintf(stderr, "unmatched pair (src=%s)\n", src.c_str());
+		}
+		else
+		{
+			sorter.addPair(src, dst);
+		}
+	}	
+}
+
 int main(int argc, char** argv)
 {
 	char delimiter = ' ';
 	bool checkCycles = false;
 	bool parallel = false;
+	bool didReadInputFile = false;
+	tsort sorter;
 	for (int i = 1; i < argc; ++i)
 	{
 		const char* arg = argv[i];
@@ -157,22 +177,20 @@ int main(int argc, char** argv)
 		else if (strlen(arg) == 3 && arg[0] == '-' && arg[1] == 'd')
 			delimiter = arg[2];
 		else
-			fprintf(stderr, "unknown argument %s ignored\n", arg);
-	}
-	tsort sorter;
-	// add all pairs
-	std::string src, dst;
-	while (std::getline(std::cin, src, delimiter))
-	{
-		if (!std::getline(std::cin, dst, '\n'))
 		{
-			fprintf(stderr, "unmatched pair (src=%s)\n", src.c_str());
-		}
-		else
-		{
-			sorter.addPair(src, dst);
+			std::istream* stream;
+			if (!strcmp(arg, "-"))
+				stream = &std::cin;
+			else
+				stream = new std::fstream(arg, std::ios_base::in);
+			readInput(sorter, *stream, delimiter);
+			didReadInputFile = true;
+			if (strcmp(arg, "-"))
+				delete stream;
 		}
 	}
+	if (!didReadInputFile)
+		readInput(sorter, std::cin, delimiter);
 	// perform topological sort
 	sorter.sort(checkCycles);
 	// print out results
