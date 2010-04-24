@@ -1,0 +1,10 @@
+tsort 0.0.1
+Copyright (c) Alistair Lynn, 2010
+
+
+I was looking at running orders for linux boot - services have dependencies on each other. So, I thought I'd look at which ones could be run in 
+parallel. This is a fairly ordinary use case for a topological sort, and, thankfully, GNU coreutils provides tsort. However, there was a feature 
+tsort lacked, which is showing what operations could be run in parallel. This annoyed me.
+
+I looked at GNU coreutils and couldn't even make it build - the source was ugly, and it was just generally a bag of utter fail. With this in 
+mind, I rewrote it.
